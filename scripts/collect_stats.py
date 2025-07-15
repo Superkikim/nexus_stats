@@ -218,7 +218,52 @@ class NexusStatsCollector:
         
         message += f"\n📅 {cet_time.strftime('%d.%m.%Y %H:%M')} {timezone_name}"
         
-        return message
+    def update_readme_badges(self, current_stats, changes):
+        """Update README.md with current stats badges"""
+        total_downloads = current_stats.get('downloads', 0)
+        daily_change = changes.get('new_downloads', 0)
+        
+        # Read current README
+        readme_content = ""
+        if os.path.exists('README.md'):
+            with open('README.md', 'r', encoding='utf-8') as f:
+                readme_content = f.read()
+        
+        # Update badges with current data
+        # Total Downloads badge
+        total_badge = f"![Downloads](https://img.shields.io/badge/Total%20Downloads-{total_downloads:,}-blue)"
+        readme_content = self.replace_badge_line(readme_content, "Total%20Downloads", total_badge)
+        
+        # Daily Growth badge
+        if daily_change > 0:
+            growth_badge = f"![Daily Growth](https://img.shields.io/badge/Daily%20Growth-+{daily_change}-brightgreen)"
+        elif daily_change == 0:
+            growth_badge = f"![Daily Growth](https://img.shields.io/badge/Daily%20Growth-0-yellow)"
+        else:
+            growth_badge = f"![Daily Growth](https://img.shields.io/badge/Daily%20Growth-{daily_change}-red)"
+            
+        readme_content = self.replace_badge_line(readme_content, "Daily%20Growth", growth_badge)
+        
+        # Write updated README
+        with open('README.md', 'w', encoding='utf-8') as f:
+            f.write(readme_content)
+            
+        print("📖 README badges updated successfully")
+    
+    def replace_badge_line(self, content, badge_type, new_badge):
+        """Replace a specific badge line in README content"""
+        import re
+        
+        # Pattern to match the badge line
+        pattern = rf'!\[[^\]]*\]\(https://img\.shields\.io/badge/{badge_type}[^)]*\)'
+        
+        if re.search(pattern, content):
+            # Replace existing badge
+            return re.sub(pattern, new_badge, content)
+        else:
+            # If badge not found, return content unchanged
+            print(f"Warning: Could not find {badge_type} badge to update")
+            return content
     
     async def run(self):
         """Main execution function"""
@@ -261,6 +306,9 @@ class NexusStatsCollector:
         # Save data
         self.save_data(daily_stats, new_summary)
         print("💾 Data saved successfully")
+        
+        # Update README badges
+        self.update_readme_badges(current_stats, changes)
         
         # Send Telegram notification (always send, even if no changes)
         message = self.format_telegram_message(current_stats, changes)
