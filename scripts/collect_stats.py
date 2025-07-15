@@ -55,9 +55,9 @@ class NexusStatsCollector:
         """Calculate changes since last update"""
         changes = {
             'new_downloads': 0,
-            'new_downloads_today': 0,
             'growth_percentage': 0,
-            'version_changes': {}
+            'version_changes': {},
+            'new_versions': []
         }
         
         if not previous_summary:
@@ -79,8 +79,13 @@ class NexusStatsCollector:
         for version, downloads in current_versions.items():
             previous_count = previous_versions.get(version, 0)
             version_change = downloads - previous_count
+            
             if version_change > 0:
                 changes['version_changes'][version] = version_change
+                
+            # Check for new versions
+            if version not in previous_versions:
+                changes['new_versions'].append(version)
                 
         return changes
     
@@ -113,36 +118,83 @@ class NexusStatsCollector:
             print(f"Error sending Telegram message: {e}")
             return False
     
-    def format_telegram_message(self, current_stats, changes, is_significant=True):
-        """Format message for Telegram"""
+    def format_telegram_message(self, current_stats, changes):
+        """Format enhanced message for Telegram"""
         total_downloads = current_stats.get('downloads', 0)
         
-        if not is_significant and changes['new_downloads'] == 0:
-            return None
+        # Header with plugin icon
+        message = "🔌 *Nexus AI Chat Importer*\n"
+        message += "📊 *Rapport quotidien des téléchargements*\n\n"
+        
+        # Main stats section
+        message += "📈 *TOTAL GÉNÉRAL*\n"
+        message += f"📱 {total_downloads:,} téléchargements (+{changes['new_downloads']})\n"
+        
+        if changes['growth_percentage'] > 0:
+            message += f"🚀 Croissance: +{changes['growth_percentage']:.2f}%\n"
+        
+        message += "\n"
+        
+        # Version breakdown - ALL versions sorted by popularity
+        current_versions = {k: v for k, v in current_stats.items() 
+                          if k not in ['downloads', 'updated']}
+        
+        if current_versions:
+            message += "📋 *RÉPARTITION PAR VERSION*\n"
             
-        # Header
-        message = "📊 *Nexus AI Chat Importer - Daily Stats*\n\n"
-        
-        # Main stats
-        if changes['new_downloads'] > 0:
-            message += f"📈 +{changes['new_downloads']} nouveaux téléchargements\n"
-            message += f"📱 Total: {total_downloads:,} téléchargements\n"
+            # Sort versions by download count (descending)
+            sorted_versions = sorted(current_versions.items(), 
+                                   key=lambda x: x[1], reverse=True)
             
-            if changes['growth_percentage'] > 0:
-                message += f"🚀 Croissance: +{changes['growth_percentage']:.1f}%\n"
-        else:
-            message += f"📱 Total: {total_downloads:,} téléchargements\n"
-            message += "😴 Pas de nouveaux téléchargements aujourd'hui\n"
+            for version, downloads in sorted_versions:
+                # Get change for this version
+                change = changes['version_changes'].get(version, 0)
+                
+                # Format percentage of total
+                percentage = (downloads / total_downloads) * 100
+                
+                # Choose emoji based on version popularity and changes
+                if version in changes.get('new_versions', []):
+                    emoji = "🆕"
+                elif change > 50:
+                    emoji = "🔥"
+                elif change > 10:
+                    emoji = "⭐"
+                elif downloads > 500:
+                    emoji = "👑"
+                elif downloads > 200:
+                    emoji = "💫"
+                else:
+                    emoji = "📦"
+                
+                # Format the line
+                change_str = f" (+{change})" if change > 0 else ""
+                message += f"{emoji} v{version}: {downloads:,}{change_str} ({percentage:.1f}%)\n"
         
-        # Version breakdown if there are changes
-        if changes['version_changes']:
-            message += "\n*Versions populaires:*\n"
-            for version, change in changes['version_changes'].items():
-                total_for_version = current_stats.get(version, 0)
-                message += f"• v{version}: +{change} (total: {total_for_version})\n"
+        # Highlight significant changes
+        if changes['new_downloads'] > 100:
+            message += f"\n🎉 *EXCELLENT !* +{changes['new_downloads']} téléchargements aujourd'hui !\n"
+        elif changes['new_downloads'] > 50:
+            message += f"\n🎊 *SUPER !* +{changes['new_downloads']} nouveaux téléchargements !\n"
+        elif changes['new_downloads'] > 10:
+            message += f"\n👍 +{changes['new_downloads']} nouveaux téléchargements\n"
+        elif changes['new_downloads'] == 0:
+            message += "\n😴 Aucun nouveau téléchargement aujourd'hui\n"
         
-        # Footer
-        message += f"\n📅 {datetime.now().strftime('%d/%m/%Y à %H:%M')}"
+        # New versions alert
+        if changes.get('new_versions'):
+            message += f"\n🆕 *NOUVELLE VERSION !* v{', v'.join(changes['new_versions'])}\n"
+        
+        # Milestones celebration
+        if total_downloads >= 10000 and (total_downloads - changes['new_downloads']) < 10000:
+            message += "\n🏆 *MILESTONE !* 10K téléchargements atteints ! 🎉\n"
+        elif total_downloads >= 5000 and (total_downloads - changes['new_downloads']) < 5000:
+            message += "\n🏆 *MILESTONE !* 5K téléchargements atteints ! 🎉\n"
+        elif total_downloads >= 3000 and (total_downloads - changes['new_downloads']) < 3000:
+            message += "\n🏆 *MILESTONE !* 3K téléchargements atteints ! 🎉\n"
+        
+        # Footer with timestamp
+        message += f"\n📅 {datetime.now().strftime('%d/%m/%Y à %H:%M')} UTC"
         
         return message
     
@@ -188,12 +240,9 @@ class NexusStatsCollector:
         self.save_data(daily_stats, new_summary)
         print("💾 Data saved successfully")
         
-        # Send Telegram notification
+        # Send Telegram notification (always send, even if no changes)
         message = self.format_telegram_message(current_stats, changes)
-        if message:
-            await self.send_telegram_message(message)
-        else:
-            print("📱 No significant changes, skipping Telegram notification")
+        await self.send_telegram_message(message)
 
 if __name__ == "__main__":
     collector = NexusStatsCollector()
