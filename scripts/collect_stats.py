@@ -218,6 +218,8 @@ class NexusStatsCollector:
         
         message += f"\n📅 {cet_time.strftime('%d.%m.%Y %H:%M')} {timezone_name}"
         
+        return message
+        
     def update_readme_badges(self, current_stats, changes):
         """Update README.md with current stats badges"""
         total_downloads = current_stats.get('downloads', 0)
