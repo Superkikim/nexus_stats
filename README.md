@@ -2,10 +2,12 @@
 
 Automated tracking and analysis of download statistics for the Nexus AI Chat Importer Obsidian plugin.
 
+**[View the plugin →](https://github.com/Superkikim/nexus-ai-chat-importer)**
+
 ## 🎯 Current Stats
 
-![Downloads](https://img.shields.io/badge/Total%20Downloads-2,636-blue)
-![Daily Growth](https://img.shields.io/badge/Daily%20Growth-0-yellow)
+![Downloads](https://img.shields.io/badge/Total%20Downloads-Loading...-blue)
+![Daily Growth](https://img.shields.io/badge/Daily%20Growth-Loading...-green)
 
 > Stats are updated daily at 9:00 AM Paris time via GitHub Actions.
 
