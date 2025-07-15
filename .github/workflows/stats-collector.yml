@@ -1,0 +1,44 @@
+# .github/workflows/stats-collector.yml
+name: Collect Nexus AI Chat Importer Stats
+
+on:
+  schedule:
+    # Run daily at 8:00 AM UTC (9:00 AM Paris time)
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  collect-stats:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests python-telegram-bot
+        
+    - name: Collect and process stats
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python scripts/collect_stats.py
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        if ! git diff --staged --quiet; then
+          git commit -m "📊 Daily stats update - $(date +'%Y-%m-%d')"
+          git push
+        else
+          echo "No changes to commit"
+        fi
