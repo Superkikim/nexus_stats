@@ -124,14 +124,14 @@ class NexusStatsCollector:
         
         # Header with plugin icon
         message = "🔌 *Nexus AI Chat Importer*\n"
-        message += "📊 *Rapport quotidien des téléchargements*\n\n"
+        message += "📊 *Daily Download Report*\n\n"
         
         # Main stats section
-        message += "📈 *TOTAL GÉNÉRAL*\n"
-        message += f"📱 {total_downloads:,} téléchargements (+{changes['new_downloads']})\n"
+        message += "📈 *OVERVIEW*\n"
+        message += f"📱 {total_downloads:,} total downloads (+{changes['new_downloads']})\n"
         
         if changes['growth_percentage'] > 0:
-            message += f"🚀 Croissance: +{changes['growth_percentage']:.2f}%\n"
+            message += f"🚀 Growth: +{changes['growth_percentage']:.2f}%\n"
         
         message += "\n"
         
@@ -140,7 +140,7 @@ class NexusStatsCollector:
                           if k not in ['downloads', 'updated']}
         
         if current_versions:
-            message += "📋 *RÉPARTITION PAR VERSION*\n"
+            message += "📋 *VERSION BREAKDOWN*\n"
             
             # Sort versions by download count (descending)
             sorted_versions = sorted(current_versions.items(), 
@@ -178,25 +178,25 @@ class NexusStatsCollector:
         
         # Highlight significant changes
         if changes['new_downloads'] > 100:
-            message += f"\n🎉 *EXCELLENT !* +{changes['new_downloads']} téléchargements aujourd'hui !\n"
+            message += f"\n🎉 *EXCELLENT!* +{changes['new_downloads']} downloads today!\n"
         elif changes['new_downloads'] > 50:
-            message += f"\n🎊 *SUPER !* +{changes['new_downloads']} nouveaux téléchargements !\n"
+            message += f"\n🎊 *GREAT!* +{changes['new_downloads']} new downloads!\n"
         elif changes['new_downloads'] > 10:
-            message += f"\n👍 +{changes['new_downloads']} nouveaux téléchargements\n"
+            message += f"\n👍 +{changes['new_downloads']} new downloads\n"
         elif changes['new_downloads'] == 0:
-            message += "\n😴 Aucun nouveau téléchargement aujourd'hui\n"
+            message += "\n😴 No new downloads today\n"
         
         # New versions alert
         if changes.get('new_versions'):
-            message += f"\n🆕 *NOUVELLE VERSION !* v{', v'.join(changes['new_versions'])}\n"
+            message += f"\n🆕 *NEW VERSION!* v{', v'.join(changes['new_versions'])}\n"
         
         # Milestones celebration
         if total_downloads >= 10000 and (total_downloads - changes['new_downloads']) < 10000:
-            message += "\n🏆 *MILESTONE !* 10K téléchargements atteints ! 🎉\n"
+            message += "\n🏆 *MILESTONE!* 10K downloads reached! 🎉\n"
         elif total_downloads >= 5000 and (total_downloads - changes['new_downloads']) < 5000:
-            message += "\n🏆 *MILESTONE !* 5K téléchargements atteints ! 🎉\n"
+            message += "\n🏆 *MILESTONE!* 5K downloads reached! 🎉\n"
         elif total_downloads >= 3000 and (total_downloads - changes['new_downloads']) < 3000:
-            message += "\n🏆 *MILESTONE !* 3K téléchargements atteints ! 🎉\n"
+            message += "\n🏆 *MILESTONE!* 3K downloads reached! 🎉\n"
         
         # Footer with timestamp in Swiss format and CET timezone
         from datetime import timezone, timedelta
