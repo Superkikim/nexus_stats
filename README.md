@@ -34,6 +34,29 @@ This repository automatically tracks:
 
 ## 📱 Telegram Integration
 
+### 🤖 Setting up the Telegram Bot
+
+Before running the automation, you'll need to create a Telegram bot to receive notifications:
+
+1. **Create the bot**: Open Telegram and message `@BotFather`
+2. **Start with** `/newbot` and follow the prompts
+3. **Choose a name** (e.g., "My Plugin Stats Bot") and **username** (must end with "_bot")
+4. **Save the token** BotFather gives you - this goes in GitHub Secrets as `TELEGRAM_BOT_TOKEN`
+5. **Get your Chat ID**: Message `@userinfobot` with `/start` to get your personal Chat ID
+6. **Test the bot**: Send any message to your new bot to activate the conversation
+
+### 🔐 Adding Secrets to GitHub
+
+To keep your bot credentials secure:
+
+1. **Go to your repository** → **Settings** → **Secrets and variables** → **Actions**
+2. **Click "New repository secret"** and add:
+   - **Name**: `TELEGRAM_BOT_TOKEN` **Value**: (the token from BotFather)
+   - **Name**: `TELEGRAM_CHAT_ID` **Value**: (your Chat ID from userinfobot)
+3. **Enable workflow permissions**: Settings → Actions → General → "Read and write permissions"
+
+The automation will send daily reports to this bot, which only you can see. Your token and Chat ID remain private in GitHub Secrets.
+
 Automated daily messages include:
 - New downloads since last check
 - Growth percentage
