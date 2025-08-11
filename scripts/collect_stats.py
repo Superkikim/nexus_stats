@@ -119,105 +119,27 @@ class NexusStatsCollector:
             return False
     
     def format_telegram_message(self, current_stats, changes):
-        """Format enhanced message for Telegram"""
+        """Format simple message for Telegram (Siri-friendly)"""
         total_downloads = current_stats.get('downloads', 0)
-        
-        # Header with plugin icon
-        message = "🔌 *Nexus AI Chat Importer*\n"
-        message += "📊 *Daily Download Report*\n\n"
-        
-        # Main stats section
-        message += "📈 *OVERVIEW*\n"
-        message += f"📱 {total_downloads:,} total downloads (+{changes['new_downloads']})\n"
-        
-        if changes['growth_percentage'] > 0:
-            message += f"🚀 Growth: +{changes['growth_percentage']:.2f}%\n"
-        
-        message += "\n"
-        
-        # Version breakdown - ALL versions sorted by popularity
-        current_versions = {k: v for k, v in current_stats.items() 
+
+        # Simple header
+        message = "Nexus AI Chat Importer Statistics\n\n"
+
+        # Main stats
+        message += f"Total Downloads: {total_downloads:,}\n"
+        message += f"New Downloads: {changes['new_downloads']}\n"
+
+        # Get latest version info
+        current_versions = {k: v for k, v in current_stats.items()
                           if k not in ['downloads', 'updated']}
-        
+
         if current_versions:
-            message += "📋 *VERSION BREAKDOWN*\n"
-            
-            # Sort versions by download count (descending)
-            sorted_versions = sorted(current_versions.items(), 
-                                   key=lambda x: x[1], reverse=True)
-            
             # Get latest version (highest version number)
             latest_version = max(current_versions.keys(), key=lambda v: tuple(map(int, v.split('.'))))
-            
-            for version, downloads in sorted_versions:
-                # Get change for this version
-                change = changes['version_changes'].get(version, 0)
-                
-                # Format percentage of total
-                percentage = (downloads / total_downloads) * 100
-                
-                # Choose emoji based on version status and activity
-                if version == latest_version:
-                    emoji = "🌟"  # Latest version
-                elif version in changes.get('new_versions', []):
-                    emoji = "🆕"  # Brand new version
-                elif change > 50:
-                    emoji = "🔥"  # Very active
-                elif change > 10:
-                    emoji = "⚡"  # Active
-                elif downloads > 500:
-                    emoji = "🏆"  # Popular legacy
-                elif downloads > 200:
-                    emoji = "💎"  # Stable legacy
-                else:
-                    emoji = "📜"  # Old version
-                
-                # Format the line
-                change_str = f" (+{change})" if change > 0 else ""
-                message += f"{emoji} v{version}: {downloads:,}{change_str} ({percentage:.1f}%)\n"
-        
-        # Highlight significant changes
-        if changes['new_downloads'] > 100:
-            message += f"\n🎉 *EXCELLENT!* +{changes['new_downloads']} downloads today!\n"
-        elif changes['new_downloads'] > 50:
-            message += f"\n🎊 *GREAT!* +{changes['new_downloads']} new downloads!\n"
-        elif changes['new_downloads'] > 10:
-            message += f"\n👍 +{changes['new_downloads']} new downloads\n"
-        elif changes['new_downloads'] == 0:
-            message += "\n😴 No new downloads today\n"
-        
-        # New versions alert
-        if changes.get('new_versions'):
-            message += f"\n🆕 *NEW VERSION!* v{', v'.join(changes['new_versions'])}\n"
-        
-        # Milestones celebration
-        if total_downloads >= 10000 and (total_downloads - changes['new_downloads']) < 10000:
-            message += "\n🏆 *MILESTONE!* 10K downloads reached! 🎉\n"
-        elif total_downloads >= 5000 and (total_downloads - changes['new_downloads']) < 5000:
-            message += "\n🏆 *MILESTONE!* 5K downloads reached! 🎉\n"
-        elif total_downloads >= 3000 and (total_downloads - changes['new_downloads']) < 3000:
-            message += "\n🏆 *MILESTONE!* 3K downloads reached! 🎉\n"
-        
-        # Footer with timestamp in Swiss format and CET timezone
-        from datetime import timezone, timedelta
-        
-        # Convert to CET (UTC+1) or CEST (UTC+2 during summer time)
-        now_utc = datetime.now(timezone.utc)
-        
-        # Simple CET/CEST calculation (CET is UTC+1, CEST is UTC+2 from late March to late October)
-        # This is a simplified version - for production you'd use pytz
-        month = now_utc.month
-        day = now_utc.day
-        
-        # Approximate DST: last Sunday in March to last Sunday in October
-        is_dst = month > 3 and month < 10 or (month == 3 and day >= 25) or (month == 10 and day < 25)
-        offset_hours = 2 if is_dst else 1
-        
-        cet_time = now_utc + timedelta(hours=offset_hours)
-        timezone_name = "CEST" if is_dst else "CET"
-        
-        message += f"\n📅 {cet_time.strftime('%d.%m.%Y %H:%M')} {timezone_name}"
-        
+            latest_downloads = current_versions[latest_version]
+
+            message += f"Total for release {latest_version}: {latest_downloads:,}\n"
+
         return message
         
     def update_readme_badges(self, current_stats, changes):
