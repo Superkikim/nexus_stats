@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-24T08:15:54.571553",
-  "total_downloads": 7312,
+  "last_updated": "2026-03-25T08:15:35.037302",
+  "total_downloads": 7326,
   "versions": {
     "1.0.2": 449,
     "1.0.3": 883,
@@ -18,8 +18,8 @@
     "1.5.3": 4,
     "1.5.0": 5,
     "1.5.5": 388,
-    "1.5.7": 219
+    "1.5.7": 233
   },
-  "daily_change": 12,
-  "growth_percentage": 0.16438356164383564
+  "daily_change": 14,
+  "growth_percentage": 0.19146608315098468
 }
