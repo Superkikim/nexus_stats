@@ -3,8 +3,9 @@ name: Collect Nexus AI Chat Importer Stats
 
 on:
   schedule:
-    # Run daily at 8:00 AM UTC (9:00 AM Paris time)
-    - cron: '0 8 * * *'
+    # Run daily at 8:30 AM CET
+    - cron: '30 8 * * *'
+      timezone: 'Europe/Zurich'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
