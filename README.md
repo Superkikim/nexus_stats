@@ -6,8 +6,8 @@ Automated tracking and analysis of download statistics for the Nexus AI Chat Imp
 
 ## 🎯 Current Stats
 
-![Downloads](https://img.shields.io/badge/Total%20Downloads-15,152-blue)
-![Daily Growth](https://img.shields.io/badge/Daily%20Growth-+54-brightgreen)
+![Downloads](https://img.shields.io/badge/Total%20Downloads-15,242-blue)
+![Daily Growth](https://img.shields.io/badge/Daily%20Growth-+90-brightgreen)
 
 > Stats are updated daily at 9:00 AM Paris time via GitHub Actions.
 
